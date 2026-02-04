@@ -2,21 +2,14 @@ import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
-/* =========================
-   HERO SLIDES
-========================= */
-const slides = [
-  { image: "/images/hero1.jpg", title: "Anaconda", year: "2026", genre: "Action • Adventure", description: "A giant snake terrorizes a remote jungle expedition." },
-  { image: "/images/hero2.jpg", title: "Zootopia 2", year: "2026", genre: "Animation • Adventure • Comedy", description: "The city of Zootopia faces new challenges with Judy and Nick." },
-  { image: "/images/hero3.jpg", title: "Aquaman 3", year: "2026", genre: "Sci-Fi • Adventure", description: "A journey beyond the stars to save humanity." },
-  { image: "/images/hero4.jpg", title: "John Wick", year: "2027", genre: "Action • Thriller", description: "An unstoppable assassin returns for one final war." },
-  { image: "/images/hero5.jpg", title: "Dune", year: "2026", genre: "Sci-Fi • Fantasy", description: "Power, prophecy, and survival on a desert planet." },
-];
+const swipeConfidence = 10000;
+const slideVariants = {
+  enter: (direction) => ({ x: direction > 0 ? "100%" : "-100%" }),
+  center: { x: 0 },
+  exit: (direction) => ({ x: direction > 0 ? "-100%" : "100%" }),
+};
 
-
-/* =========================
-   RELEASE SOON SLIDES
-========================= */
+// Release Soon static data
 const releaseSoon = [
   { image: "/images/release1.jpg", title: "Avatar 3" },
   { image: "/images/release2.jpg", title: "Guardians of the Galaxy 3" },
@@ -25,26 +18,49 @@ const releaseSoon = [
   { image: "/images/release5.jpg", title: "Star Wars: Rogue Planet" },
 ];
 
-const swipeConfidence = 10000;
-const slideVariants = {
-  enter: (direction) => ({ x: direction > 0 ? "100%" : "-100%" }),
-  center: { x: 0 },
-  exit: (direction) => ({ x: direction > 0 ? "-100%" : "100%" }),
-};
-
 export default function HeroReleaseSoon() {
   const [[index, direction], setIndex] = useState([0, 0]);
+  const [slides, setSlides] = useState([]);
   const paused = useRef(false);
 
-  const paginate = (dir) => setIndex(([prev]) => [(prev + dir + slides.length) % slides.length, dir]);
+  // Fetch top 5 movies from TMDB
+  useEffect(() => {
+    const fetchMovies = async () => {
+      try {
+        const res = await fetch(
+          "https://api.themoviedb.org/3/discover/movie?api_key=80d491707d8cf7b38aa19c7ccab0952f&language=en-US&sort_by=popularity.desc&page=1"
+        );
+        const data = await res.json();
+        // Take only first 5 movies and map to your slide format
+        const top5 = data.results.slice(0, 5).map((movie) => ({
+          image: `https://image.tmdb.org/t/p/original${movie.backdrop_path || movie.poster_path}`,
+          title: movie.title,
+          year: movie.release_date ? movie.release_date.slice(0, 4) : "N/A",
+          genre: movie.genre_ids.join(" • "), // optionally you can map ids to names if needed
+          description: movie.overview,
+          rating: movie.vote_average,
+        }));
+        setSlides(top5);
+      } catch (err) {
+        console.error("Failed to fetch movies:", err);
+      }
+    };
 
-  /* AUTO SLIDE */
+    fetchMovies();
+  }, []);
+
+  const paginate = (dir) =>
+    setIndex(([prev]) => [(prev + dir + slides.length) % slides.length, dir]);
+
+  // Auto-slide
   useEffect(() => {
     const timer = setInterval(() => {
-      if (!paused.current) paginate(1);
+      if (!paused.current && slides.length > 0) paginate(1);
     }, 4500);
     return () => clearInterval(timer);
-  }, []);
+  }, [slides]);
+
+  if (slides.length === 0) return null; // wait until slides loaded
 
   return (
     <section
@@ -52,7 +68,7 @@ export default function HeroReleaseSoon() {
       onMouseEnter={() => (paused.current = true)}
       onMouseLeave={() => (paused.current = false)}
     >
-      {/* HERO SLIDER (LEFT 85%) */}
+      {/* HERO SLIDER */}
       <div className="relative w-[85%] overflow-hidden rounded-lg shadow-2xl -mt-6">
         <AnimatePresence initial={false} custom={direction}>
           <motion.div
@@ -123,7 +139,7 @@ export default function HeroReleaseSoon() {
         </button>
       </div>
 
-      {/* RELEASE SOON SIDEBAR (RIGHT 15%) */}
+      {/* RELEASE SOON */}
       <div className="w-[15%] flex flex-col gap-4 pl-4 mt-6">
         <h2 className="text-white text-lg font-bold uppercase tracking-wide border-b border-gray-700 pb-2 mb-2">
           Release Soon

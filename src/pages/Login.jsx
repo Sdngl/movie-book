@@ -1,20 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import React, { useState } from "react";
+import { useNavigate, Link, Navigate } from "react-router-dom";
 import { auth } from "../config/firebase";
-import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
 
 export default function Login() {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(JSON.parse(localStorage.getItem("user")) || null);
   const [form, setForm] = useState({ email: "", password: "" });
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      if (currentUser) navigate("/"); // redirect if already logged in
-    });
-    return () => unsubscribe();
-  }, [navigate]);
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -23,22 +15,27 @@ export default function Login() {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, form.email, form.password);
 
-      // Save user in localStorage
+      // Determine role based on email
+      const role = userCredential.user.email === "admin123@gmail.com" ? "admin" : "user";
+
       const userData = {
         uid: userCredential.user.uid,
         displayName: userCredential.user.displayName || "User",
         email: userCredential.user.email,
-        role: "user",
+        role,
       };
-      localStorage.setItem("user", JSON.stringify(userData));
 
-      navigate("/");
+      localStorage.setItem("user", JSON.stringify(userData));
+      setUser(userData); // update state
+
+      navigate("/"); // redirect after login
     } catch (err) {
       alert(err.message);
     }
   };
 
-  if (user) return null;
+  // If already logged in, redirect to home
+  if (user) return <Navigate to="/" replace />;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900">
@@ -63,12 +60,18 @@ export default function Login() {
             className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600"
             required
           />
-          <button type="submit" className="w-full bg-red-600 text-white py-2 rounded-lg font-semibold hover:bg-red-700 transition">
+          <button
+            type="submit"
+            className="w-full bg-red-600 text-white py-2 rounded-lg font-semibold hover:bg-red-700 transition"
+          >
             Login
           </button>
         </form>
         <p className="mt-4 text-center text-gray-300 text-sm">
-          Don't have an account? <Link to="/register" className="text-red-600 hover:underline">Register</Link>
+          Don't have an account?{" "}
+          <Link to="/register" className="text-red-600 hover:underline">
+            Register
+          </Link>
         </p>
       </div>
     </div>
