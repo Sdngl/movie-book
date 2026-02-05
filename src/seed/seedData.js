@@ -1,6 +1,6 @@
 // src/seed/seedData.js
 import { collection, getDocs, doc, setDoc } from "firebase/firestore";
-import { db } from "../config/Firebase";
+import { db } from "../config/firebase";
 
 // Movies data
 const MOVIES = [

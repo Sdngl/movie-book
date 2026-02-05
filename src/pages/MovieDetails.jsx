@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { doc, getDoc, collection, getDocs, query, where } from "firebase/firestore";
-import { db } from "../config/Firebase";
+import { db } from "../config/firebase";
 
 export default function MovieDetails() {
   const { movieId } = useParams();

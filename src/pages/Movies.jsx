@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { collection, getDocs } from "firebase/firestore";
-import { db } from "../config/Firebase";
+import { db } from "../config/firebase";
 
 export default function Movies() {
   const [movies, setMovies] = useState([]);
