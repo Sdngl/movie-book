@@ -11,11 +11,11 @@ const slideVariants = {
 
 // Release Soon static data
 const releaseSoon = [
-  { image: "/images/release1.jpg", title: "Avatar 3" },
-  { image: "/images/release2.jpg", title: "Guardians of the Galaxy 3" },
-  { image: "/images/release3.jpg", title: "Mission Impossible 8" },
-  { image: "/images/release4.jpg", title: "Black Panther 2" },
-  { image: "/images/release5.jpg", title: "Star Wars: Rogue Planet" },
+  { image: "/images/hero1.jpg", title: "Avatar 3" },
+  { image: "/images/hero2.jpg", title: "Guardians of the Galaxy 3" },
+  { image: "/images/hero3.jpg", title: "Mission Impossible 8" },
+  { image: "/images/hero4.jpg", title: "Black Panther 2" },
+  { image: "/images/hero5.jpg", title: "Star Wars: Rogue Planet" },
 ];
 
 export default function HeroReleaseSoon() {

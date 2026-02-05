@@ -17,23 +17,35 @@ import Genre from "./pages/Genre";
 import Contact from "./pages/Contact";
 import Footer from "./pages/Footer";
 import Navbar from "./pages/Navbar";
+import { seedFirestore } from "./seed/seedData";
 
 import './App.css';
+import { useEffect } from "react";
 
 function App() {
+  useEffect(() => {
+    // Seed the Firestore database when the app loads
+    seedFirestore();
+  }, []);
+
   return (
     <>
       <Navbar />
-      {/* <div className="app-container"> */}
       <Routes>
+        {/* Home */}
         <Route path="/" element={<Home />} />
-        
+
+        {/* Authentication */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/category" element={<Category />} />
+
+        {/* Movies */}
         <Route path="/movies" element={<Movies />} />
+        <Route path="/movie/:movieId" element={<MovieDetails />} /> {/* Updated route */}
+
+        {/* Other pages */}
+        <Route path="/category" element={<Category />} />
         <Route path="/genre" element={<Genre />} />
-        <Route path="/movies/:id" element={<MovieDetails />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/confirmation" element={<Confirmation />} />
         <Route path="/contact" element={<Contact />} />
@@ -42,10 +54,8 @@ function App() {
         <Route path="/sidebar" element={<Sidebar />} />
         <Route path="/users" element={<Users />} />
         <Route path="/logout-confirmation" element={<LogoutConfirmationModal />} />
-        
       </Routes>
-      {/* </div> */}
-      <Footer/>
+      <Footer />
     </>
   );
 }
