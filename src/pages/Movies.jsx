@@ -21,14 +21,13 @@ export default function Movies() {
         setLoading(false);
       }
     };
-
     fetchMovies();
   }, []);
 
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen text-gray-400 text-lg bg-gradient-to-b from-gray-900 via-black to-gray-800">
-        Loading movies...
+        <div className="animate-pulse">Loading movies...</div>
       </div>
     );
   }
@@ -44,48 +43,74 @@ export default function Movies() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-black to-gray-800 text-white">
       <div className="max-w-7xl mx-auto px-4 py-12">
-        <h1 className="text-4xl font-bold mb-10 text-center">Now Showing & Coming Soon</h1>
+        <header className="mb-12 text-center">
+          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-500">
+            Now Showing & Coming Soon
+          </h1>
+          <div className="h-1 w-20 bg-yellow-500 mx-auto mt-4 rounded-full"></div>
+        </header>
 
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
           {movies.map(movie => (
             <div
               key={movie.id}
-              className="bg-gray-800/60 backdrop-blur-sm rounded-lg overflow-hidden shadow-xl hover:scale-105 transform transition cursor-pointer hover:shadow-2xl"
+              className="group bg-gray-900/40 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col border border-gray-800 hover:border-gray-600 cursor-pointer"
               onClick={() => navigate(`/movie/${movie.id}`)}
             >
-              {/* Poster */}
-              <div className="w-full h-64 bg-gray-700 flex items-center justify-center text-gray-400 font-semibold relative">
-                {movie.posterUrl ? (
+              {/* Poster Container with 2:3 Aspect Ratio */}
+              <div className="relative w-full aspect-[2/3] overflow-hidden bg-gray-800">
+                {movie.imageUrl ? (
                   <img
-                    src={movie.posterUrl}
+                    src={movie.imageUrl}
                     alt={movie.title}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-110"
+                    loading="lazy"
                   />
                 ) : (
-                  "Poster"
+                  <div className="w-full h-full flex items-center justify-center text-gray-500 italic text-sm">
+                    No Poster Available
+                  </div>
                 )}
-                {/* Optional overlay gradient */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                
+                {/* Status Badge - Top Left Overlay */}
+                <div className="absolute top-2 left-2">
+                  <span
+                    className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider ${
+                      movie.status === "now_showing" ? "bg-green-600" : "bg-red-600"
+                    } shadow-md shadow-black/50`}
+                  >
+                    {movie.status ? movie.status.replace("_", " ") : "UNKNOWN"}
+                  </span>
+                </div>
+
+                {/* Bottom Gradient for readability */}
+                <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-transparent to-transparent opacity-80" />
               </div>
 
               {/* Movie Info */}
-              <div className="p-4">
-                <h2 className="text-xl font-bold mb-1">{movie.title}</h2>
+              <div className="p-4 flex flex-col flex-grow">
+                <h2 className="text-lg font-bold mb-1 line-clamp-1 group-hover:text-yellow-400 transition-colors" title={movie.title}>
+                  {movie.title}
+                </h2>
+                
                 {movie.genre && movie.genre.length > 0 && (
-                  <p className="text-gray-300 text-sm mb-2">{movie.genre.join(", ")}</p>
-                )}
-                {movie.rating && (
-                  <p className="text-yellow-400 font-semibold mb-2">Rating: {movie.rating}</p>
+                  <p className="text-gray-400 text-xs mb-3 line-clamp-1">
+                    {movie.genre.join(" • ")}
+                  </p>
                 )}
 
-                {/* Status Badge */}
-                <span
-                  className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                    movie.status === "now_showing" ? "bg-green-600" : "bg-red-600"
-                  }`}
-                >
-                  {movie.status ? movie.status.replace("_", " ").toUpperCase() : "UNKNOWN"}
-                </span>
+                <div className="mt-auto flex items-center justify-between">
+                  {movie.rating ? (
+                    <div className="flex items-center gap-1">
+                      <span className="text-yellow-400 text-sm">★</span>
+                      <span className="text-yellow-400 font-bold text-sm">
+                        {movie.rating}
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="text-gray-500 text-xs italic">N/A Rating</span>
+                  )}
+                </div>
               </div>
             </div>
           ))}

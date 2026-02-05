@@ -13,21 +13,22 @@ export default function MovieDetails() {
   const [showTimingClicked, setShowTimingClicked] = useState(false);
   const [selectedShowtime, setSelectedShowtime] = useState(null);
 
-  const trailerMap = {
-    movie_201: "https://www.youtube.com/watch?v=WBmv0RK4fPo",
-    movie_202: "https://www.youtube.com/watch?v=H8ieN10lX40",
-    movie_203: "https://www.youtube.com/watch?v=BjkIOU5PhyQ",
-    movie_204: "",
-    movie_205: "",
-    movie_206: "https://www.youtube.com/watch?v=0PD9D9pv0KE",
-    movie_207: "https://www.youtube.com/watch?v=NAhYJh-gm40",
-    movie_208: "",
-    movie_209: "https://www.youtube.com/watch?v=9760oMSJtQQ",
-    movie_210: "https://www.youtube.com/watch?v=mqqft2x_Aa4",
-    movie_211: "https://www.youtube.com/watch?v=Way9Dexny3w",
-    movie_212: "https://www.youtube.com/watch?v=cH4E_t3m3lI",
-  };
+ const trailerMap = {
+  movie_201: "https://www.youtube.com/watch?v=WBmv0RK4fPo",
+  movie_202: "https://www.youtube.com/watch?v=H8ieN10lX40",
+  movie_203: "https://www.youtube.com/watch?v=BjkIOU5PhyQ",
+  movie_204: "https://www.youtube.com/watch?v=dDuzTlur3NU",
+  movie_205: "https://www.youtube.com/watch?v=tYAVuxqamyY",
+  movie_206: "https://www.youtube.com/watch?v=0PD9D9pv0KE",
+  movie_207: "https://www.youtube.com/watch?v=NAhYJh-gm40",
+  movie_208: "https://www.youtube.com/watch?v=sPasJKsvz5A",
+  movie_209: "https://www.youtube.com/watch?v=9760oMSJtQQ",
+  movie_210: "https://www.youtube.com/watch?v=mqqft2x_Aa4",
+  movie_211: "https://www.youtube.com/watch?v=Way9Dexny3w",
+  movie_212: "https://www.youtube.com/watch?v=cH4E_t3m3lI",
+};
 
+  // Fetch movie data
   useEffect(() => {
     const fetchMovie = async () => {
       try {
@@ -42,6 +43,7 @@ export default function MovieDetails() {
     fetchMovie();
   }, [movieId]);
 
+  // Fetch theatres
   useEffect(() => {
     const fetchTheatres = async () => {
       try {
@@ -54,6 +56,7 @@ export default function MovieDetails() {
     fetchTheatres();
   }, []);
 
+  // Fetch showtimes for selected theatre
   const fetchShowtimes = async () => {
     if (!selectedTheatre) return;
     try {
@@ -72,10 +75,15 @@ export default function MovieDetails() {
   };
 
   if (!movie)
-    return <div className="flex justify-center items-center h-screen text-gray-400 text-lg">Loading...</div>;
+    return (
+      <div className="flex justify-center items-center h-screen text-gray-400 text-lg">
+        Loading...
+      </div>
+    );
 
   const getEmbedUrl = (url) => url.replace("watch?v=", "embed/");
 
+  // Lazy trailer player
   const LazyTrailer = ({ trailerUrl, posterUrl }) => {
     const [isPlaying, setIsPlaying] = useState(false);
     return (
@@ -134,9 +142,15 @@ export default function MovieDetails() {
 
           <div className="bg-gray-900/80 backdrop-blur p-6 rounded-lg shadow-lg space-y-3 text-gray-100">
             <h1 className="text-3xl font-bold">{movie.title}</h1>
-            <p><span className="font-semibold">Genre:</span> {movie.genre?.join(", ")}</p>
-            <p><span className="font-semibold">Duration:</span> {movie.duration} min</p>
-            <p><span className="font-semibold">Rating:</span> {movie.rating}</p>
+            <p>
+              <span className="font-semibold">Genre:</span> {movie.genre?.join(", ")}
+            </p>
+            <p>
+              <span className="font-semibold">Duration:</span> {movie.duration} min
+            </p>
+            <p>
+              <span className="font-semibold">Rating:</span> {movie.rating}
+            </p>
             <p className="mt-2">{movie.synopsis}</p>
           </div>
         </div>
@@ -168,10 +182,11 @@ export default function MovieDetails() {
                 >
                   <option value="">Choose Theatre</option>
                   {theatres.map((t) => (
-                    <option key={t.id} value={t.id}>{t.name}</option>
+                    <option key={t.id} value={t.id}>
+                      {t.name}
+                    </option>
                   ))}
                 </select>
-
                 {selectedTheatre && (
                   <button
                     className="bg-red-600 hover:bg-red-700 text-white py-2 px-6 rounded-lg font-semibold transition-all shadow-lg"
@@ -189,19 +204,20 @@ export default function MovieDetails() {
                   {showtimes.map((show) => (
                     <button
                       key={show.id}
-                      className={`py-2 rounded-lg font-medium w-full transition-all shadow-sm
-                        ${selectedShowtime === show.id ? "bg-red-700 text-white scale-105" : "bg-red-600 text-white hover:bg-red-700"}
-                      `}
+                      className={`py-2 rounded-lg font-medium w-full transition-all shadow-sm ${
+                        selectedShowtime === show.id
+                          ? "bg-red-700 text-white scale-105"
+                          : "bg-red-600 text-white hover:bg-red-700"
+                      }`}
                       onClick={() => setSelectedShowtime(show.id)}
                     >
                       {show.time}
                     </button>
                   ))}
                 </div>
-
                 {selectedShowtime && (
                   <button className="w-full bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors shadow-lg">
-                    Buy Ticket
+                    Book Ticket
                   </button>
                 )}
               </div>
