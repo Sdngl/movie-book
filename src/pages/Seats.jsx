@@ -11,7 +11,6 @@ export default function Seats() {
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  /* ---------------- FETCH SEATS ---------------- */
   useEffect(() => {
     const fetchSeats = async () => {
       try {
@@ -19,13 +18,11 @@ export default function Seats() {
           collection(db, "seats"),
           where("showTimeId", "==", showtimeId)
         );
-
         const snapshot = await getDocs(q);
         const fetchedSeats = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
-
         setSeats(fetchedSeats);
       } catch (err) {
         console.error("Error fetching seats:", err);
@@ -33,14 +30,11 @@ export default function Seats() {
         setLoading(false);
       }
     };
-
     fetchSeats();
   }, [showtimeId]);
 
-  /* ---------------- SEAT TOGGLE ---------------- */
   const toggleSeat = (seatId, status) => {
     if (status !== "available") return;
-
     setSelectedSeats((prev) =>
       prev.includes(seatId)
         ? prev.filter((id) => id !== seatId)
@@ -48,7 +42,6 @@ export default function Seats() {
     );
   };
 
-  /* ---------------- GROUP BY ROW ---------------- */
   const groupedSeats = seats.reduce((acc, seat) => {
     const row = seat.seatId.charAt(0);
     acc[row] = acc[row] || [];
@@ -58,66 +51,88 @@ export default function Seats() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen text-gray-400">
-        Loading seats...
+      <div className="flex items-center justify-center h-screen bg-[#0f0f0f]">
+        <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-gray-800 px-6 py-12 text-white">
-      <div className="max-w-6xl mx-auto space-y-10">
+    <div className="min-h-screen bg-[#0b0b0b] text-white py-12 px-4">
+      <div className="max-w-6xl mx-auto flex flex-col items-center">
 
         {/* HEADER */}
-        <div className="flex items-center justify-between">
+        <div className="w-full flex justify-between items-center mb-16">
           <button
             onClick={() => navigate(-1)}
-            className="text-gray-400 hover:text-white"
+            className="text-gray-500 hover:text-white transition-colors"
           >
-            ← Back
+            ← BACK
           </button>
-          <h1 className="text-3xl font-bold tracking-wide">
-            Choose Your Seats
+
+          <h1 className="text-2xl font-black italic tracking-widest uppercase">
+            Choose Your <span className="text-purple-500">Space</span>
           </h1>
+
+          <div className="w-10" />
         </div>
 
         {/* SCREEN */}
-        <div className="relative">
-          <div className="h-2 bg-gradient-to-r from-gray-700 via-gray-300 to-gray-700 rounded-full mb-4" />
-          <p className="text-center text-xs text-gray-400 tracking-widest">
-            SCREEN
+        <div className="w-full mb-20">
+          <div className="h-1 w-full bg-gradient-to-r from-transparent via-purple-500 to-transparent shadow-[0_0_20px_rgba(168,85,247,0.8)]" />
+          <p className="text-center text-[10px] font-bold tracking-[0.8em] text-purple-400 mt-4 uppercase">
+            S C R E E N
           </p>
         </div>
 
-        {/* SEATS */}
-        <div className="space-y-4">
-          {Object.keys(groupedSeats)
-            .sort()
-            .map((row) => (
-              <div key={row} className="flex items-center gap-4">
-                <span className="w-6 text-gray-400 font-semibold">{row}</span>
+        {/* GRID + LEGEND */}
+        <div className="flex gap-12">
 
-                <div className="grid grid-cols-8 gap-3">
+          {/* SEAT GRID */}
+          <div className="flex flex-col items-center gap-4 bg-white/5 p-10 rounded-[3rem] border border-white/5 shadow-2xl">
+            {Object.keys(groupedSeats).sort().map((row) => (
+              <div
+                key={row}
+                className={`flex items-center gap-6 transition-all duration-300 ${
+                  row === "G" || row === "H"
+                    ? "hover:bg-purple-500/10 hover:shadow-[0_0_25px_rgba(168,85,247,0.4)] px-4 py-2 rounded-2xl"
+                    : ""
+                }`}
+              >
+                <span className="w-4 text-xs font-black text-gray-600 uppercase">
+                  {row}
+                </span>
+
+                <div className="flex gap-3">
                   {groupedSeats[row].map((seat) => {
                     const isSelected = selectedSeats.includes(seat.id);
+                    const isVIP = seat.type === "vip";
 
-                    let seatColor = "bg-green-600 hover:bg-green-500"; // Available
-                    if (seat.status === "sold") seatColor = "bg-red-600";
-                    if (seat.status === "reserved") seatColor = "bg-blue-600";
-                    if (isSelected) seatColor = "bg-yellow-400 text-black";
+                    let seatClass = "";
+
+                    if (seat.status === "sold") {
+                      seatClass =
+                        "bg-red-600 text-white cursor-not-allowed opacity-40 shadow-[0_0_10px_rgba(239,68,68,0.6)]";
+                    } else if (seat.status === "reserved") {
+                      seatClass =
+                        "bg-blue-600 text-white cursor-not-allowed opacity-50 shadow-[0_0_10px_rgba(37,99,235,0.6)]";
+                    } else if (isSelected) {
+                      seatClass =
+                        "bg-yellow-400 text-black shadow-[0_0_15px_rgba(250,204,21,0.6)] scale-110";
+                    } else if (isVIP) {
+                      seatClass =
+                        "bg-purple-600 text-white shadow-[0_0_10px_rgba(147,51,234,0.5)] hover:shadow-[0_0_20px_rgba(147,51,234,0.8)]";
+                    } else {
+                      seatClass =
+                        "bg-emerald-600 text-white shadow-[0_0_10px_rgba(16,185,129,0.4)] hover:shadow-[0_0_20px_rgba(16,185,129,0.7)]";
+                    }
 
                     return (
                       <button
                         key={seat.id}
                         disabled={seat.status !== "available"}
                         onClick={() => toggleSeat(seat.id, seat.status)}
-                        className={`w-11 h-11 rounded-md text-xs font-bold transition
-                          ${seatColor}
-                          ${
-                            seat.status !== "available"
-                              ? "cursor-not-allowed opacity-70"
-                              : "hover:scale-105"
-                          }`}
+                        className={`w-10 h-10 rounded-xl text-[10px] font-black transition-all duration-300 ${seatClass}`}
                       >
                         {seat.seatId.slice(1)}
                       </button>
@@ -126,32 +141,49 @@ export default function Seats() {
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* RIGHT LEGEND */}
+          <div className="flex flex-col gap-6 bg-black/40 px-6 py-8 rounded-[2rem] border border-white/5 h-fit sticky top-32">
+            <Legend label="Available" color="bg-emerald-600 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+            <Legend label="VIP" color="bg-purple-600 shadow-[0_0_10px_rgba(147,51,234,0.5)]" />
+            <Legend label="Selected" color="bg-yellow-400 shadow-[0_0_10px_rgba(250,204,21,0.5)]" />
+            <Legend label="Reserved" color="bg-blue-600 shadow-[0_0_10px_rgba(37,99,235,0.6)]" />
+            <Legend label="Sold" color="bg-red-600 shadow-[0_0_10px_rgba(239,68,68,0.6)]" />
+          </div>
         </div>
 
-        {/* LEGEND */}
-        <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-300">
-          <Legend color="bg-green-600" label="Available" />
-          <Legend color="bg-yellow-400" label="Selected" text="text-black" />
-          <Legend color="bg-red-600" label="Sold Out" />
-          <Legend color="bg-blue-600" label="Reserved" />
-        </div>
-
-        {/* ACTION BAR */}
+        {/* BOTTOM BAR */}
         {selectedSeats.length > 0 && (
-          <div className="sticky bottom-6 bg-gray-900/90 backdrop-blur p-5 rounded-xl flex justify-between items-center shadow-lg">
-            <p className="text-lg">
-              Selected Seats:{" "}
-              <span className="font-bold text-yellow-400">
-                {selectedSeats.length}
-              </span>
-            </p>
+          <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-2xl bg-white/10 backdrop-blur-2xl border border-white/10 p-6 rounded-[2.5rem] flex justify-between items-center shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                Total Selection
+              </p>
+              <p className="text-xl font-black">
+                {selectedSeats.length}{" "}
+                <span className="text-purple-500">Seats</span>
+              </p>
+            </div>
 
-            <button
-              onClick={() => navigate("/confirmation")}
-              className="bg-red-600 px-8 py-3 rounded-lg font-semibold hover:bg-red-700 transition"
-            >
-              Continue →
-            </button>
+            <div className="flex gap-4">
+              <button
+                onClick={() =>
+                  navigate("/reservation", { state: { selectedSeats } })
+                }
+                className="px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest border border-white/20 hover:bg-white/10 transition-all"
+              >
+                Reserve
+              </button>
+              <button
+                onClick={() =>
+                  navigate("/checkout", { state: { selectedSeats } })
+                }
+                className="px-10 py-4 rounded-2xl text-xs font-black uppercase tracking-widest bg-purple-600 hover:bg-purple-500 transition-all active:scale-95"
+              >
+                Buy Now
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -159,12 +191,13 @@ export default function Seats() {
   );
 }
 
-/* ---------------- LEGEND COMPONENT ---------------- */
-function Legend({ color, label, text = "text-white" }) {
+function Legend({ color, label }) {
   return (
-    <div className="flex items-center gap-2">
-      <div className={`w-4 h-4 rounded ${color}`} />
-      <span className={text}>{label}</span>
+    <div className="flex items-center gap-3">
+      <div className={`w-3 h-3 rounded-full ${color}`} />
+      <span className="text-[10px] font-bold uppercase tracking-tighter text-gray-400">
+        {label}
+      </span>
     </div>
   );
 }
