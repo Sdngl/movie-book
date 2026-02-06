@@ -1,60 +1,85 @@
 import { Routes, Route } from "react-router-dom";
+import { useEffect } from "react";
+
+/* Pages */
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Movies from "./pages/Movies";
 import MovieDetails from "./pages/MovieDetails";
-import Admin from "./pages/Admin";
+import Seats from "./pages/Seats";
 import Confirmation from "./pages/Confirmation";
-
-import MovieDashboard from "./pages/MovieDashboard";
 import MyBookings from "./pages/MyBookings";
-import Sidebar from "./pages/Sidebar";
+import Admin from "./pages/Admin";
+import MovieDashboard from "./pages/MovieDashboard";
 import Users from "./pages/Users";
-import LogoutConfirmationModal from "./pages/LogoutConfirmationModal";
+import Sidebar from "./pages/Sidebar";
 import Category from "./pages/Category";
 import Genre from "./pages/Genre";
 import Contact from "./pages/Contact";
-import Footer from "./pages/Footer";
-import Navbar from "./pages/Navbar";
-import { seedFirestore } from "./seed/seedData";
+import LogoutConfirmationModal from "./pages/LogoutConfirmationModal";
 
-import './App.css';
-import { useEffect } from "react";
+/* Layout */
+import Navbar from "./pages/Navbar";
+import Footer from "./pages/Footer";
+
+/* Firestore Seed (DEV ONLY) */
+// import { seedFirestore } from "./seed/seedData";
+
+import "./App.css";
 
 function App() {
+
+  /*
+  ⚠️ DEV ONLY
+  Uncomment this ONCE to seed data, then comment it back.
+  NEVER keep this enabled in production.
+  */
+  /*
   useEffect(() => {
-    // Seed the Firestore database when the app loads
     seedFirestore();
   }, []);
+  */
 
   return (
     <>
       <Navbar />
+
       <Routes>
         {/* Home */}
         <Route path="/" element={<Home />} />
 
-        {/* Authentication */}
+        {/* Auth */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
         {/* Movies */}
         <Route path="/movies" element={<Movies />} />
-        <Route path="/movie/:movieId" element={<MovieDetails />} /> {/* Updated route */}
+        <Route path="/movie/:movieId" element={<MovieDetails />} />
+        <Route path="/seats/:movieId/:showtimeId" element={<Seats />} />
 
-        {/* Other pages */}
+        {/* Booking */}
+        <Route path="/confirmation" element={<Confirmation />} />
+        <Route path="/my-bookings" element={<MyBookings />} />
+
+        {/* Admin */}
+        <Route path="/admin" element={<Admin />} />
+        <Route path="/movie-dashboard" element={<MovieDashboard />} />
+        <Route path="/users" element={<Users />} />
+        <Route path="/sidebar" element={<Sidebar />} />
+
+        {/* Filters & Info */}
         <Route path="/category" element={<Category />} />
         <Route path="/genre" element={<Genre />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="/confirmation" element={<Confirmation />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/movie-dashboard" element={<MovieDashboard />} />
-        <Route path="/my-bookings" element={<MyBookings />} />
-        <Route path="/sidebar" element={<Sidebar />} />
-        <Route path="/users" element={<Users />} />
-        <Route path="/logout-confirmation" element={<LogoutConfirmationModal />} />
+
+        {/* Misc */}
+        <Route
+          path="/logout-confirmation"
+          element={<LogoutConfirmationModal />}
+        />
       </Routes>
+
       <Footer />
     </>
   );
