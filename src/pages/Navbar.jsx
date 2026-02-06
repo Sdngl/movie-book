@@ -15,12 +15,8 @@ const DefaultAvatar = () => (
 export default function Navbar() {
   const [user, setUser] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [showNavbar, setShowNavbar] = useState(false); // controls navbar visibility
-  const [lastY, setLastY] = useState(0);
   const navigate = useNavigate();
 
-  // Firebase Auth listener
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
@@ -40,81 +36,85 @@ export default function Navbar() {
     navigate("/login");
   };
 
-  // Show navbar when hovering near top or moving mouse upward
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      if (e.clientY < 50) setShowNavbar(true); // top 50px always shows navbar
-      else if (e.clientY < lastY) setShowNavbar(true); // moving mouse upward
-      else setShowNavbar(false); // moving downward hides
-      setLastY(e.clientY);
-    };
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, [lastY]);
-
   return (
-    <AnimatePresence>
-      {showNavbar && (
-        <motion.nav
-          initial={{ y: -100, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: -100, opacity: 0 }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
-          className="fixed top-0 left-0 w-full z-50 backdrop-blur-md bg-black/50 transition-colors"
-        >
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="flex items-center justify-between h-20">
-              {/* Left: Logo & Links */}
-              <div className="flex items-center gap-10">
-                <Link to="/" className="text-3xl font-extrabold tracking-wider text-red-600 hover:scale-105 transition-transform">
-                  Cine<span className="text-white">Loop</span>
-                </Link>
-
-                <ul className="hidden md:flex gap-6 text-sm font-bold uppercase tracking-widest text-gray-300">
-                  <li><Link to="/movies" className="hover:text-red-500 transition-colors">Movies</Link></li>
-                  <li><Link to="/category" className="hover:text-red-500 transition-colors">Category</Link></li>
-                  <li><Link to="/genre" className="hover:text-red-500 transition-colors">Genre</Link></li>
-                  <li><Link to="/contact" className="hover:text-red-500 transition-colors">Contact</Link></li>
-                </ul>
-              </div>
-
-              {/* Right: Auth */}
-              <div className="hidden md:flex items-center gap-6">
-                {!user ? (
-                  <Link to="/login" className="bg-red-600 px-6 py-2 rounded-full text-xs font-bold uppercase hover:bg-red-700 transition-all">
-                    Login
-                  </Link>
-                ) : (
-                  <div className="relative">
-                    <button onClick={() => setDropdownOpen(!dropdownOpen)} className="flex items-center gap-2 text-white focus:outline-none group">
-                      {user.photoURL ? <img src={user.photoURL} alt="Profile" className="w-9 h-9 rounded-full border-2 border-transparent group-hover:border-red-600 transition-all" /> : <DefaultAvatar />}
-                      <div className="hidden lg:flex flex-col text-right mr-2">
-                        <span className="text-[10px] text-gray-400 font-bold uppercase leading-none mb-1">Welcome</span>
-                        <span className="text-xs font-bold leading-none">{user.displayName || "User"}</span>
-                      </div>
-                    </button>
-
-                    <AnimatePresence>
-                      {dropdownOpen && (
-                        <motion.div 
-                          initial={{ opacity: 0, y: -10 }} 
-                          animate={{ opacity: 1, y: 0 }} 
-                          exit={{ opacity: 0, y: -10 }}
-                          className="absolute right-0 mt-3 w-48 bg-gray-900 border border-white/10 rounded-lg shadow-2xl z-50 overflow-hidden"
-                        >
-                          {user.role === "admin" && <Link to="/dashboard" className="block px-4 py-3 text-white text-xs font-bold hover:bg-gray-800 transition-colors">DASHBOARD</Link>}
-                          <Link to="/my-booking" className="block px-4 py-3 text-white text-xs font-bold hover:bg-gray-800 transition-colors">MY BOOKINGS</Link>
-                          <button onClick={handleLogout} className="w-full text-left px-4 py-3 text-red-500 text-xs font-bold hover:bg-red-600 hover:text-white transition-colors">LOGOUT</button>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                )}
-              </div>
-            </div>
+    <nav className="fixed top-0 left-0 w-full z-50 backdrop-blur-md bg-black/60 border-b border-white/5 transition-colors">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="flex items-center justify-between h-20">
+          <div className="flex items-center gap-10">
+            <Link to="/" className="text-3xl font-extrabold tracking-tighter text-red-600 hover:scale-105 transition-transform italic">
+              Cine<span className="text-white">Loop</span>
+            </Link>
+            <ul className="hidden md:flex gap-8 text-[11px] font-black uppercase tracking-[0.2em] text-gray-400">
+              <li><Link to="/movies" className="hover:text-red-500 transition-colors">Movies</Link></li>
+              <li><Link to="/category" className="hover:text-red-500 transition-colors">Category</Link></li>
+              <li><Link to="/genre" className="hover:text-red-500 transition-colors">Genre</Link></li>
+              <li><Link to="/contact" className="hover:text-red-500 transition-colors">Contact</Link></li>
+            </ul>
           </div>
-        </motion.nav>
-      )}
-    </AnimatePresence>
+
+          <div className="flex items-center gap-6">
+            {!user ? (
+              <Link to="/login" className="bg-red-600 px-8 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-red-700 shadow-lg shadow-red-600/20 transition-all">
+                Login
+              </Link>
+            ) : (
+              <div className="relative">
+                <button 
+                  onClick={() => setDropdownOpen(!dropdownOpen)} 
+                  className="flex items-center gap-3 text-white focus:outline-none group bg-white/5 p-1.5 pr-4 rounded-full border border-white/10 hover:bg-white/10 transition-all"
+                >
+                  {user.photoURL ? (
+                    <img src={user.photoURL} alt="Profile" className="w-8 h-8 rounded-full object-cover" />
+                  ) : (
+                    <DefaultAvatar />
+                  )}
+                  <div className="hidden lg:flex flex-col text-left">
+                    <span className="text-[9px] text-gray-500 font-black uppercase leading-none mb-1">Profile</span>
+                    <span className="text-xs font-bold leading-none tracking-tight">{user.displayName || "User"}</span>
+                  </div>
+                </button>
+
+                <AnimatePresence>
+                  {dropdownOpen && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }} 
+                      animate={{ opacity: 1, y: 0, scale: 1 }} 
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      className="absolute right-0 mt-4 w-56 bg-[#0f0f0f] border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden backdrop-blur-xl"
+                    >
+                      <div className="p-4 border-b border-white/5 bg-white/5">
+                        <p className="text-[10px] font-black text-gray-500 uppercase mb-1">Signed in as</p>
+                        <p className="text-xs font-bold text-white truncate">{user.displayName || "Member"}</p>
+                      </div>
+
+                      <div className="p-2">
+                        {user.role === "admin" && (
+                          <Link to="/dashboard" className="flex items-center px-4 py-3 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-white/5 rounded-lg transition-colors">
+                            Dashboard
+                          </Link>
+                        )}
+                        <Link 
+                          to="/my-bookings" 
+                          className="flex items-center px-4 py-3 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-white/5 rounded-lg transition-colors"
+                        >
+                          My Bookings
+                        </Link>
+                        <hr className="my-2 border-white/5" />
+                        <button 
+                          onClick={handleLogout} 
+                          className="w-full text-left px-4 py-3 text-red-500 text-[10px] font-bold uppercase tracking-widest hover:bg-red-600 hover:text-white rounded-lg transition-all"
+                        >
+                          Logout
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </nav>
   );
 }
