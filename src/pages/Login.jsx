@@ -10,7 +10,7 @@ import {
 export default function Login() {
   const navigate = useNavigate();
   const [user, setUser] = useState(
-    JSON.parse(localStorage.getItem("user")) || null
+    JSON.parse(sessionStorage.getItem("user")) || null
   );
   const [form, setForm] = useState({ email: "", password: "" });
 

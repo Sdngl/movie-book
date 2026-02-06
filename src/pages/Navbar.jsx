@@ -20,7 +20,7 @@ export default function Navbar() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
-        const storedUser = JSON.parse(localStorage.getItem("user"));
+        const storedUser = JSON.parse(sessionStorage.getItem("user"));
         setUser(storedUser || { displayName: currentUser.displayName, role: "user" });
       } else {
         setUser(null);
@@ -31,7 +31,7 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     await signOut(auth);
-    localStorage.removeItem("user");
+    sessionStorage.removeItem("user");
     setUser(null);
     navigate("/login");
   };
