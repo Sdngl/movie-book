@@ -26,28 +26,46 @@ export default function Movies() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen text-gray-400 text-lg bg-gradient-to-b from-gray-900 via-black to-gray-800">
-        <div className="animate-pulse">Loading movies...</div>
+      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-purple-500/30 border-t-purple-500 rounded-full animate-spin" />
+          <p className="text-slate-400 font-bold uppercase tracking-widest text-sm">Loading movies...</p>
+        </div>
       </div>
     );
   }
 
   if (movies.length === 0) {
     return (
-      <div className="flex justify-center items-center h-screen text-gray-400 text-lg bg-gradient-to-b from-gray-900 via-black to-gray-800">
-        No movies available at the moment.
+      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-white/5 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-10 h-10 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
+            </svg>
+          </div>
+          <p className="text-slate-400 text-lg font-bold uppercase tracking-widest">No movies available</p>
+          <p className="text-slate-600 text-sm mt-2">Check back later for new releases</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-black to-gray-800 text-white">
-      <div className="max-w-7xl mx-auto px-4 py-12">
+    <div className="min-h-screen bg-[#0a0a0f] pt-24 pb-16">
+      <div className="max-w-7xl mx-auto px-6">
         <header className="mb-12 text-center">
-          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-500">
-            Now Showing & Coming Soon
-          </h1>
-          <div className="h-1 w-20 bg-yellow-500 mx-auto mt-4 rounded-full"></div>
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-fuchsia-600 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
+              </svg>
+            </div>
+            <h1 className="text-4xl md:text-5xl font-black tracking-tight text-white uppercase">
+              All <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-400">Movies</span>
+            </h1>
+          </div>
+          <div className="h-1 w-20 bg-gradient-to-r from-purple-500 to-fuchsia-500 mx-auto rounded-full" />
         </header>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">

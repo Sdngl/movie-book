@@ -8,13 +8,21 @@ import {
   doc,
   writeBatch,
 } from "firebase/firestore";
+import { auth } from "../config/firebase";
+import { onAuthStateChanged } from "firebase/auth";
 import { db } from "../config/firebase";
 
-const currentUserId = "user_abc_123"; // Replace with your Auth Context
-const TEST_MODE = true; // Set to false to enable Firestore writes
+let currentUserId = null;
+const TEST_MODE = true;
 
 // Temporary store for reserved seats for MyBookings
 export let reservedSeatsStore = [];
+
+// Seat prices
+const SEAT_PRICES = {
+  standard: 300,
+  vip: 500,
+};
 
 export default function Seats() {
   const { showtimeId } = useParams();
@@ -23,6 +31,22 @@ export default function Seats() {
   const [seats, setSeats] = useState([]);
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+
+  /* ===================== AUTH CHECK ===================== */
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        const storedUser = JSON.parse(localStorage.getItem("user"));
+        currentUserId = currentUser.uid;
+        setUser(storedUser || { displayName: currentUser.displayName, role: "user" });
+      } else {
+        currentUserId = null;
+        setUser(null);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
   /* ===================== REAL-TIME SYNC ===================== */
   useEffect(() => {
@@ -45,6 +69,10 @@ export default function Seats() {
 
   /* ===================== SEAT TOGGLE ===================== */
   const toggleSeat = (seat) => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
     if (seat.status === "sold") return;
     if (seat.status === "reserved" && seat.reservedBy !== currentUserId)
       return;
@@ -71,6 +99,10 @@ export default function Seats() {
 
   /* ===================== RESERVE LOGIC ===================== */
   const handleReserve = async () => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
     if (selectedSeats.length === 0) return;
 
     // 1. Update UI instantly
@@ -123,29 +155,89 @@ export default function Seats() {
 
   const sortedRows = Object.keys(groupedSeats).sort();
 
+  /* ===================== CALCULATE TOTAL ===================== */
+  const calculateTotal = () => {
+    let total = 0;
+    selectedSeats.forEach((seatId) => {
+      const seat = seats.find((s) => s.id === seatId);
+      if (seat) {
+        const price = seat.type === "vip" ? SEAT_PRICES.vip : SEAT_PRICES.standard;
+        total += price;
+      }
+    });
+    return total;
+  };
+
+  /* ===================== GET SELECTED SEATS DATA ===================== */
+  const getSelectedSeatsData = () => {
+    return selectedSeats.map((seatId) => {
+      const seat = seats.find((s) => s.id === seatId);
+      return {
+        id: seatId,
+        seatId: seat?.seatId || seatId,
+        type: seat?.type || "standard",
+        price: seat?.type === "vip" ? SEAT_PRICES.vip : SEAT_PRICES.standard,
+      };
+    });
+  };
+
+  /* ===================== BUY NOW HANDLER ===================== */
+  const handleBuyNow = () => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    
+    const selectedSeatsData = getSelectedSeatsData();
+    const total = calculateTotal();
+    
+    navigate("/Confirmation", { 
+      state: { 
+        seats: selectedSeats,
+        seatsData: selectedSeatsData,
+        total: total,
+        movieId: showtimeId?.split("_")[1] || "",
+        showtimeId: showtimeId
+      } 
+    });
+  };
+
   if (loading) {
     return (
-      <div className="h-screen bg-[#050505] flex items-center justify-center text-white">
-        Loading Cinema...
+      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-purple-500/30 border-t-purple-500 rounded-full animate-spin" />
+          <p className="text-slate-400 font-bold uppercase tracking-widest text-sm">Loading Cinema...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] text-slate-200 py-10 px-6">
-      <div className="max-w-6xl mx-auto flex flex-col items-center">
+    <div className="min-h-screen bg-[#0a0a0f] text-slate-200 pt-24 pb-24 px-6">
+      <div className="max-w-7xl mx-auto flex flex-col items-center">
         {/* HEADER */}
         <header className="w-full flex justify-between items-center mb-16">
           <button
             onClick={() => navigate(-1)}
-            className="text-slate-500 hover:text-white transition-colors text-sm font-bold tracking-widest"
+            className="flex items-center gap-2 text-slate-500 hover:text-white transition-all text-sm font-bold tracking-widest"
           >
-            ← EXIT
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            EXIT
           </button>
 
-          <h1 className="text-3xl font-black uppercase italic tracking-tighter">
-            Experience <span className="text-purple-500">Lux</span>
-          </h1>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-fuchsia-600 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h1 className="text-3xl font-black uppercase italic tracking-tighter">
+              Experience <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-400">Lux</span>
+            </h1>
+          </div>
 
           <div className="w-12" />
         </header>
@@ -189,9 +281,10 @@ export default function Seats() {
                             "bg-amber-900/20 border-amber-500/40 text-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.1)]";
                         }
 
+                        // Sold seats - RED (purchased)
                         if (isSold)
                           colorClass =
-                            "bg-red-950/40 border-red-900/20 text-red-900 cursor-not-allowed opacity-30";
+                            "bg-red-600/40 border-red-500/50 text-red-400 cursor-not-allowed shadow-[0_0_15px_rgba(220,38,38,0.4)]";
 
                         if (isReserved) {
                           colorClass = isReservedByMe
@@ -226,37 +319,38 @@ export default function Seats() {
               <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500">
                 Legend
               </h4>
-              <Legend color="bg-slate-800" label="Standard" />
-              <Legend color="bg-amber-600 shadow-[0_0_10px_rgba(245,158,11,0.5)]" label="VIP Space" />
+              <Legend color="bg-slate-800" label="Standard (रु 300)" />
+              <Legend color="bg-amber-600 shadow-[0_0_10px_rgba(245,158,11,0.5)]" label="VIP (रु 500)" />
               <Legend color="bg-purple-500" label="Selecting" />
               <Legend color="bg-blue-600" label="Reserved" />
-              <Legend color="bg-red-900 opacity-40" label="Sold" />
+              <Legend color="bg-red-600" label="Sold" />
             </div>
           </div>
         </div>
 
         {/* BOTTOM BAR */}
         {selectedSeats.length > 0 && (
-          <div className="fixed bottom-10 left-1/2 -translate-x-1/2 w-[92%] max-w-3xl bg-slate-900/90 backdrop-blur-3xl border border-white/10 p-6 rounded-[2.5rem] shadow-2xl flex justify-between items-center">
+          <div className="fixed bottom-10 left-1/2 -translate-x-1/2 w-[92%] max-w-3xl bg-slate-900/90 backdrop-blur-3xl border border-white/10 p-6 rounded-[2.5rem] shadow-2xl flex justify-between items-center z-50">
             <div>
               <p className="text-[10px] font-black text-slate-500 uppercase">Selection</p>
               <h2 className="text-2xl font-black text-white">
                 {selectedSeats.length} <span className="text-purple-500">Seats</span>
               </h2>
+              <p className="text-sm text-slate-400 mt-1">Total: रु {calculateTotal()}</p>
             </div>
 
             <div className="flex gap-4">
               <button
                 onClick={handleReserve}
-                className="px-8 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest border border-blue-500/50 text-blue-400 hover:bg-blue-500/10"
+                className="px-8 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest border border-blue-500/50 text-blue-400 hover:bg-blue-500/10 transition-all"
               >
                 Reserve
               </button>
               <button
-                onClick={() => navigate("/checkout", { state: { selectedSeats } })}
-                className="px-10 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-xl"
+                onClick={handleBuyNow}
+                className="px-10 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-xl hover:shadow-purple-500/30 transition-all"
               >
-                Buy Now
+                Buy Now - रु {calculateTotal()}
               </button>
             </div>
           </div>
