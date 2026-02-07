@@ -30,16 +30,15 @@ import { seedFirestoreSafe } from "./seed/seedData";
 import "./App.css";
 
 function App() {
-
   /*
   ⚠️ DEV ONLY
   Uncomment this ONCE to seed missing showtimes & seats.
   Batch size ensures Firestore free plan limits are respected.
   After running, comment it back to prevent reseeding in production.
   */
-  useEffect(() => {
-    seedFirestoreSafe(3); // Seed 3 movies at a time starting from the 4th movie
-  }, []);
+  // useEffect(() => {
+  //   seedFirestoreSafe(3); // Seed 3 movies at a time starting from the 4th movie
+  // }, []);
 
   return (
     <>
