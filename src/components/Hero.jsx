@@ -96,11 +96,11 @@ export default function Hero() {
             }}
           >
             {/* Slide Image - Full cover without cropping */}
-            <div className="absolute inset-0">
+            <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-purple-900/20 via-[#0a0a0f]/80 to-[#0a0a0f]">
               <img
                 src={slides[index].imageUrl}
                 alt={slides[index].title}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover object-center"
               />
             </div>
 
@@ -120,7 +120,7 @@ export default function Hero() {
                   </span>
                 </div>
                 
-                <h1 className="text-5xl md:text-7xl font-black tracking-tight drop-shadow-2xl">
+                <h1 className="text-4xl md:text-6xl font-black tracking-tight drop-shadow-2xl">
                   {slides[index].title}
                 </h1>
                 

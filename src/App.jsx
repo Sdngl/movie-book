@@ -1,7 +1,8 @@
+// src/App.jsx
 import { Routes, Route } from "react-router-dom";
 import { useEffect } from "react";
 
-/* Pages */
+/* ========================= Pages ========================= */
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -19,12 +20,12 @@ import Genre from "./pages/Genre";
 import Contact from "./pages/Contact";
 import LogoutConfirmationModal from "./pages/LogoutConfirmationModal";
 
-/* Layout */
+/* ========================= Layout ========================= */
 import Navbar from "./pages/Navbar";
 import Footer from "./pages/Footer";
 
-/* Firestore Seed (DEV ONLY) */
-// import { seedFirestore } from "./seed/seedData";
+/* ========================= Firestore Seed (DEV ONLY) ========================= */
+import { seedFirestoreSafe } from "./seed/seedData";
 
 import "./App.css";
 
@@ -32,14 +33,13 @@ function App() {
 
   /*
   ⚠️ DEV ONLY
-  Uncomment this ONCE to seed data, then comment it back.
-  NEVER keep this enabled in production.
+  Uncomment this ONCE to seed missing showtimes & seats.
+  Batch size ensures Firestore free plan limits are respected.
+  After running, comment it back to prevent reseeding in production.
   */
-  /*
   useEffect(() => {
-    seedFirestore();
+    seedFirestoreSafe(3); // Seed 3 movies at a time starting from the 4th movie
   }, []);
-  */
 
   return (
     <>
@@ -74,10 +74,7 @@ function App() {
         <Route path="/contact" element={<Contact />} />
 
         {/* Misc */}
-        <Route
-          path="/logout-confirmation"
-          element={<LogoutConfirmationModal />}
-        />
+        <Route path="/logout-confirmation" element={<LogoutConfirmationModal />} />
       </Routes>
 
       <Footer />

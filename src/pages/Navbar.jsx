@@ -84,9 +84,12 @@ export default function Navbar() {
                 </span>
               </Link>
             ) : (
-              <div className="relative">
+              <div 
+                className="relative"
+                onMouseEnter={() => setDropdownOpen(true)}
+                onMouseLeave={() => setDropdownOpen(false)}
+              >
                 <button 
-                  onClick={() => setDropdownOpen(!dropdownOpen)} 
                   className="flex items-center gap-3 text-white focus:outline-none group bg-white/5 p-1.5 pr-4 rounded-full border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all"
                 >
                   {user.photoURL ? (
