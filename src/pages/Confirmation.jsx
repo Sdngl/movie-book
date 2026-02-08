@@ -388,7 +388,18 @@ export default function Confirmation() {
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Theatre</p>
                   <p className="text-white font-bold">{theatre?.name || "Unknown"}</p>
-                  <p className="text-sm text-slate-400">{theatre?.location}</p>
+                  <a 
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(theatre?.location || "")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-slate-400 hover:text-purple-400 transition-colors flex items-center gap-1"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    {theatre?.location}
+                  </a>
                 </div>
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Showtime</p>
