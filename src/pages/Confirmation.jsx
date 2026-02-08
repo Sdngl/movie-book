@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { doc, getDoc, updateDoc, collection, query, where, getDocs } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../config/firebase";
 import { auth } from "../config/firebase";
 import { onAuthStateChanged } from "firebase/auth";
@@ -347,24 +347,91 @@ export default function Confirmation() {
       {showSuccessPopup && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={handleContinue} />
-          <div className="relative bg-[#0a0a0f] border border-white/10 rounded-3xl p-8 max-w-md w-full backdrop-blur-xl shadow-2xl">
+          <div className="relative bg-[#0a0a0f] border border-white/10 rounded-3xl p-8 max-w-lg w-full backdrop-blur-xl shadow-2xl max-h-[90vh] overflow-y-auto">
             <div className="text-center">
               <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-500/30">
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-12 h-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <h2 className="text-3xl font-black text-white mb-2 uppercase tracking-tight">
-                Payment <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400">Done!</span>
+              <h2 className="text-3xl font-black italic uppercase tracking-tight">
+                Payment <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400 italic">Done!</span>
               </h2>
-              <p className="text-slate-400 mb-6">Your tickets have been booked successfully.</p>
-              <button
-                onClick={handleContinue}
-                className="px-8 py-4 bg-gradient-to-r from-purple-600 to-fuchsia-600 rounded-xl text-white font-black uppercase tracking-widest hover:shadow-lg hover:shadow-purple-500/30 transition-all"
-              >
-                Continue
-              </button>
+              <p className="text-slate-400 text-sm font-bold uppercase tracking-wider mb-6">Your tickets have been booked successfully.</p>
             </div>
+
+            {/* Booking Details Summary */}
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-5 mb-6">
+              {/* Movie Info */}
+              <div className="flex items-center gap-4 mb-4 pb-4 border-b border-white/10">
+                {movie?.imageUrl && (
+                  <img 
+                    src={movie.imageUrl} 
+                    alt={movie.title}
+                    className="w-16 h-24 object-cover rounded-lg"
+                  />
+                )}
+                <div className="flex-1">
+                  <h3 className="text-xl font-black italic uppercase tracking-tight">{movie?.title || "Movie"}</h3>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {movie?.genre?.slice(0, 2).map((g, i) => (
+                      <span key={i} className="px-3 py-1 bg-white/10 rounded-full text-[10px] font-black uppercase tracking-widest text-slate-300">
+                        {g}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Theatre & Showtime */}
+              <div className="grid grid-cols-2 gap-4 mb-4 pb-4 border-b border-white/10">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Theatre</p>
+                  <p className="text-white font-bold">{theatre?.name || "Unknown"}</p>
+                  <p className="text-sm text-slate-400">{theatre?.location}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Showtime</p>
+                  <p className="text-white font-bold">{showtime?.time || "Unknown"}</p>
+                  <p className="text-sm text-slate-400">Today</p>
+                </div>
+              </div>
+
+              {/* Reserved Seats */}
+              <div className="mb-4 pb-4 border-b border-white/10">
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-3">Reserved Seats</p>
+                <div className="flex flex-wrap gap-2">
+                  {seatsData.map((seat) => (
+                    <div
+                      key={seat.id}
+                      className={`px-3 py-1.5 rounded-lg text-sm font-black uppercase flex items-center gap-2 ${
+                        seat.type === "vip"
+                          ? "bg-gradient-to-r from-amber-600/20 to-orange-600/20 border border-amber-500/30 text-amber-400"
+                          : "bg-gradient-to-r from-purple-600/20 to-fuchsia-600/20 border border-purple-500/30 text-purple-400"
+                      }`}
+                    >
+                      <span>{seat.seatId}</span>
+                      <span className="text-[10px] font-bold opacity-60">रु {seat.price}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Total Amount */}
+              <div className="flex justify-between items-center">
+                <span className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Total Paid</span>
+                <span className="text-2xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400">
+                  रु {grandTotal}
+                </span>
+              </div>
+            </div>
+
+            <button
+              onClick={handleContinue}
+              className="w-full px-8 py-4 bg-gradient-to-r from-purple-600 to-fuchsia-600 rounded-xl text-white font-black uppercase tracking-widest hover:shadow-lg hover:shadow-purple-500/30 transition-all"
+            >
+              Continue
+            </button>
           </div>
         </div>
       )}

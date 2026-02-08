@@ -19,10 +19,28 @@ export default function MovieDetails() {
   const [movie, setMovie] = useState(null);
   const [theatres, setTheatres] = useState([]);
   const [selectedTheatre, setSelectedTheatre] = useState("");
+  const [selectedDate, setSelectedDate] = useState("");
   const [showtimes, setShowtimes] = useState([]);
   const [showTimingClicked, setShowTimingClicked] = useState(false);
   const [selectedShowtime, setSelectedShowtime] = useState(null);
   const [user, setUser] = useState(null);
+
+  // Generate next 7 dates
+  const getNextSevenDays = () => {
+    const dates = [];
+    const today = new Date();
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() + i);
+      dates.push({
+        value: date.toISOString().split('T')[0],
+        label: date.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' })
+      });
+    }
+    return dates;
+  };
+
+  const dateOptions = getNextSevenDays();
 
   const trailerMap = {
     movie_201: "https://www.youtube.com/watch?v=WBmv0RK4fPo",
@@ -257,15 +275,35 @@ export default function MovieDetails() {
                 </div>
 
                 {selectedTheatre && (
-                  <button
-                    onClick={fetchShowtimes}
-                    className="w-full py-4 bg-gradient-to-r from-purple-600 to-fuchsia-600 rounded-xl text-white font-black uppercase tracking-widest text-sm hover:shadow-lg hover:shadow-purple-500/30 transition-all flex items-center justify-center gap-2"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Show Timings
-                  </button>
+                  <>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Select Date</label>
+                      <div className="flex gap-2 overflow-x-auto pb-2">
+                        {dateOptions.map((date) => (
+                          <button
+                            key={date.value}
+                            onClick={() => setSelectedDate(date.value)}
+                            className={`px-4 py-3 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${
+                              selectedDate === date.value
+                                ? "bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-lg shadow-purple-500/30"
+                                : "bg-white/5 text-white hover:bg-white/10"
+                            }`}
+                          >
+                            {date.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <button
+                      onClick={fetchShowtimes}
+                      className="w-full py-4 bg-gradient-to-r from-purple-600 to-fuchsia-600 rounded-xl text-white font-black uppercase tracking-widest text-sm hover:shadow-lg hover:shadow-purple-500/30 transition-all flex items-center justify-center gap-2"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Show Timings
+                    </button>
+                  </>
                 )}
               </div>
             </>
@@ -278,6 +316,7 @@ export default function MovieDetails() {
                   setShowTimingClicked(false);
                   setShowtimes([]);
                   setSelectedShowtime(null);
+                  setSelectedDate("");
                 }}
                 className="flex items-center gap-2 text-slate-400 hover:text-white mb-6 text-sm font-bold uppercase tracking-wider transition-colors"
               >
@@ -286,6 +325,21 @@ export default function MovieDetails() {
                 </svg>
                 Back to Theatre
               </button>
+
+              <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-4">
+                <div className="flex items-center gap-2 text-white font-bold">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                  {theatres.find(t => t.id === selectedTheatre)?.name}
+                </div>
+                <div className="flex items-center gap-2 text-slate-400 text-sm mt-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  {dateOptions.find(d => d.value === selectedDate)?.label}
+                </div>
+              </div>
 
               <div className="space-y-4">
                 <div>
